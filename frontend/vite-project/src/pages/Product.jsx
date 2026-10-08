@@ -14,6 +14,8 @@ function Product() {
     const [selectedColor, setSelectedColor] = useState("");
     const [selectedSize, setSelectedSize] = useState("");
     const [wishlist, setWishlist] = useState(false);
+    const [quantity, setQuantity] = useState(1);
+    const [addedToCart, setAddedToCart] = useState(false);
 
 
     useEffect(() => {
@@ -128,6 +130,38 @@ function Product() {
         }
     };
 
+    const handleAddToCart = async () => {
+    try {
+        const response = await fetch(
+            `https://scaling-goldfish-7rvj4rvrxg42wq9r-8084.app.github.dev/cart/${id}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    selectedColor,
+                    selectedSize,
+                    quantity
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Unable to add product to cart"
+            );
+        }
+
+        setAddedToCart(true);
+
+    } catch (err) {
+        console.error(err.message);
+    }
+};
 
     if (loading) {
         return (
@@ -318,24 +352,58 @@ function Product() {
 
                     {/* Actions */}
 
-                    <div className={styles.actions}>
+            <div className={styles.actions}>
 
-                        <button className={styles.addButton}>
-                            ADD TO SHOPPING BAG
-                        </button>
+                <div className={styles.quantityControl}>
 
-                        <button
-                            className={`${styles.wishlistButton} ${
-                                wishlist ? styles.wishlisted : ""
-                            }`}
-                            onClick={handleWishlist}
-                            aria-label="Add to wishlist"
-                        >
-                            ♥
-                        </button>
+                    <button
+                        className={styles.quantityButton}
+                        onClick={() =>
+                            setQuantity((prev) => Math.max(1, prev - 1))
+                        }
+                        aria-label="Decrease quantity"
+                    >
+                        −
+                    </button>
 
-                    </div>
+                    <span className={styles.quantity}>
+                        {quantity}
+                    </span>
 
+                    <button
+                        className={styles.quantityButton}
+                        onClick={() =>
+                            setQuantity((prev) => prev + 1)
+                        }
+                        aria-label="Increase quantity"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+
+                <button
+                className={`${styles.addButton} ${
+                    addedToCart ? styles.addedButton : ""
+                }`}
+                onClick={handleAddToCart}
+            >
+                {addedToCart ? "ADDED TO BAG" : "ADD TO SHOPPING BAG"}
+            </button>
+
+
+                <button
+                    className={`${styles.wishlistButton} ${
+                        wishlist ? styles.wishlisted : ""
+                    }`}
+                    onClick={handleWishlist}
+                    aria-label="Add to wishlist"
+                >
+                    ♥
+                </button>
+
+            </div>
 
                      {/* Details */}
 

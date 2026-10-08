@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./Navbar.module.css";
 import { useNavigate } from "react-router-dom";
 
@@ -11,6 +11,7 @@ function Navbar() {
     // SEARCH STATE
     const [showSearch, setShowSearch] = useState(false);
     const [search, setSearch] = useState("");
+    const [cartCount, setCartCount] = useState(0);
 
     const categories = [
         "T-Shirts",
@@ -51,6 +52,38 @@ function Navbar() {
             setShowSearch(false);
         }
     };
+    useEffect(() => {
+    const getCartCount = async () => {
+        try {
+            const response = await fetch(
+                "https://scaling-goldfish-7rvj4rvrxg42wq9r-8084.app.github.dev/cart",
+                {
+                    credentials: "include"
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || "Unable to fetch cart"
+                );
+            }
+
+            const totalQuantity = data.cart.reduce(
+                (total, item) => total + item.quantity,
+                0
+            );
+
+            setCartCount(totalQuantity);
+
+        } catch (err) {
+            console.error("Cart count error:", err);
+        }
+    };
+
+    getCartCount();
+}, []);
 
 
     return (
@@ -202,6 +235,7 @@ function Navbar() {
                 <button
                     className={styles.iconButton}
                     aria-label="Shopping cart"
+                    onClick={() => navigate("/cart")}
                 >
                     <svg
                         viewBox="0 0 24 24"
@@ -225,7 +259,7 @@ function Navbar() {
                     </svg>
 
                     <span className={styles.cartCount}>
-                        0
+                        {cartCount}
                     </span>
                 </button>
 

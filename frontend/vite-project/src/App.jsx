@@ -7,6 +7,7 @@ import Landing from "./pages/LandingPage.jsx";
 import AccountPage from "./pages/AccountPage.jsx";
 import ProductsPage from "./pages/ProductsPage.jsx";
 import WishlistPage from "./pages/WishlistPage.jsx";
+import Cart from "./pages/Cart.jsx";
 import "./App.css";
 
 function App() {
@@ -125,6 +126,7 @@ function App() {
                         path="/wishlist"
                         element={<WishlistPage />}
                     />
+                    <Route path="/cart" element={<Cart />} />
 
                 </Routes>
 

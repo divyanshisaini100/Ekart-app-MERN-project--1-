@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import UserRoutes from "./routes/UserRoutes.js"
 import ProductRoutes from "./routes/ProductRoutes.js"
 import WishlistRoutes from "./routes/WishlistRoutes.js"
+import CartRoutes from "./routes/CartRoutes.js"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 
@@ -36,7 +37,7 @@ app.use(cors({
         "https://scaling-goldfish-7rvj4rvrxg42wq9r-5173.app.github.dev",
         "https://scaling-goldfish-7rvj4rvrxg42wq9r-5173.app.github.dev/"
     ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // 🟢 Explicitly allow OPTIONS preflight requests
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], // 🟢 Explicitly allow OPTIONS preflight requests
     credentials: true, // 🔓 Necessary to allow secure JWT cookie exchanges
     allowedHeaders: ["Content-Type", "Authorization"] // Allow JSON headers to pass through
 }));
@@ -46,6 +47,7 @@ app.use(express.json())
 app.use("/user", UserRoutes)
 app.use("/products", ProductRoutes)
 app.use("/wishlist", WishlistRoutes)
+app.use("/cart", CartRoutes);
 
 app.listen(port, '0.0.0.0', ()=>
    console.log(`Server is running at ${port}`)
