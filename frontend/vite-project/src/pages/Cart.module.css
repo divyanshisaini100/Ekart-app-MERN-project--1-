@@ -679,6 +679,24 @@
 }
 
 
+.paymentError {
+    color: #b42318;
+    font-size: 13px;
+    margin-top: 12px;
+}
+
+.paymentSuccess {
+    color: #287443;
+    font-size: 13px;
+    margin-top: 12px;
+}
+
+.checkoutButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
 /* =========================
    TABLET
 ========================= */

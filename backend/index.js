@@ -5,6 +5,7 @@ import UserRoutes from "./routes/UserRoutes.js"
 import ProductRoutes from "./routes/ProductRoutes.js"
 import WishlistRoutes from "./routes/WishlistRoutes.js"
 import CartRoutes from "./routes/CartRoutes.js"
+import PaymentRoutes from "./routes/PaymentRoutes.js"
 import cookieParser from "cookie-parser"
 import cors from "cors"
 
@@ -48,6 +49,7 @@ app.use("/user", UserRoutes)
 app.use("/products", ProductRoutes)
 app.use("/wishlist", WishlistRoutes)
 app.use("/cart", CartRoutes);
+app.use("/payment", PaymentRoutes);
 
 app.listen(port, '0.0.0.0', ()=>
    console.log(`Server is running at ${port}`)

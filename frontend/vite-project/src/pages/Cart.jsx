@@ -12,7 +12,11 @@ function Cart() {
 
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    const [error, setError] = useState("");    
+    const [paymentLoading, setPaymentLoading] = useState(false);
+    const [paymentError, setPaymentError] = useState("");
+    const [paymentSuccess, setPaymentSuccess] = useState("");
+
 
     const fetchCart = async () => {
 
@@ -182,6 +186,111 @@ function Cart() {
         }
     };
 
+    
+const handleCheckout = async () => {
+    if (paymentLoading || cartItems.length === 0) return;
+
+    setPaymentLoading(true);
+    setPaymentError("");
+    setPaymentSuccess("");
+
+    try {
+        // Step 1: Ask your backend to create a Razorpay order
+        const response = await fetch(
+            `${API_BASE}/payment/create-order`,
+            {
+                method: "POST",
+                credentials: "include"
+            }
+        );
+
+        const orderData = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                orderData.message || "Unable to create order"
+            );
+        }
+
+        // Step 2: Check that Razorpay Checkout loaded
+        if (!window.Razorpay) {
+            throw new Error(
+                "Razorpay failed to load. Please refresh the page."
+            );
+        }
+
+        // Step 3: Configure the Razorpay popup
+        const options = {
+                key: orderData.keyId,
+                amount: orderData.amount,
+                currency: orderData.currency,
+                name: "EKART",
+                description: "Your Ekart order",
+                order_id: orderData.orderId,
+                theme: {
+                    color: "#cda083"
+                },
+
+                // Step 4: Verify payment through your backend
+                handler: async (paymentResponse) => {
+                    try {
+                        const verifyResponse = await fetch(
+                            `${API_BASE}/payment/verify`,
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                credentials: "include",
+                                body: JSON.stringify(paymentResponse)
+                            }
+                        );
+
+                        const verifyData = await verifyResponse.json();
+
+                        if (!verifyResponse.ok) {
+                            throw new Error(
+                                verifyData.message ||
+                                "Payment verification failed"
+                            );
+                        }
+
+                       setCartItems([]);
+                       setPaymentSuccess("Payment verified successfully!");
+
+                    } catch (err) {
+                        setPaymentError(err.message);
+                    } finally {
+                        setPaymentLoading(false);
+                    }
+                },
+
+                modal: {
+                    ondismiss: () => {
+                        setPaymentLoading(false);
+                    }
+                }
+            };
+
+            const razorpay = new window.Razorpay(options);
+
+            razorpay.on("payment.failed", (event) => {
+                setPaymentError(
+                    event.error?.description ||
+                    "Payment failed. Please try again."
+                );
+                setPaymentLoading(false);
+            });
+
+            // Step 5: Open the payment popup
+            razorpay.open();
+
+        } catch (err) {
+            setPaymentError(err.message);
+            setPaymentLoading(false);
+        }
+    };
+
 
     // Total number of physical items
     const totalQuantity = cartItems.reduce(
@@ -295,6 +404,12 @@ function Cart() {
             {cartItems.length === 0 ? (
 
                 <div className={styles.emptyCart}>
+
+                {paymentSuccess && (
+                    <p className={styles.paymentSuccess} role="status">
+                        {paymentSuccess}
+                    </p>
+                )}
 
                     <h2>Your cart is empty</h2>
 
@@ -593,15 +708,29 @@ function Cart() {
                         </div>
 
 
+                        
                         <button
                             className={styles.checkoutButton}
-                            onClick={() => {
-                                // Checkout will be built next
-                                console.log("Proceed to checkout");
-                            }}
+                            onClick={handleCheckout}
+                            disabled={paymentLoading || cartItems.length === 0}
                         >
-                            Proceed to Checkout
+                            {paymentLoading
+                                ? "PLEASE WAIT..."
+                                : "PROCEED TO CHECKOUT"}
                         </button>
+
+                        {paymentError && (
+                            <p className={styles.paymentError} role="alert">
+                                {paymentError}
+                            </p>
+                        )}
+
+                        {paymentSuccess && (
+                            <p className={styles.paymentSuccess} role="status">
+                                {paymentSuccess}
+                            </p>
+                        )}
+
 
 
                         <div className={styles.securityInfo}>

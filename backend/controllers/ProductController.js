@@ -63,6 +63,12 @@ export const getProducts = async function(req, res){
 export const getProductById = async function(req, res){
     try{
         const id = req.params.id;
+        if (!mongoose.Types.ObjectId.isValid(productId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid product ID'
+            })
+        }
         const product = await ProductModel.findById(id);
         if(!product){
             return res.status(404).json({message: "Product not found"})
